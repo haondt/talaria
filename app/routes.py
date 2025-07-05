@@ -2,7 +2,6 @@ from fastapi import FastAPI, Request, WebSocket, WebSocketDisconnect, status
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse, Response
 import logging
-import json
 from .state import state
 import asyncio
 from .config import config
@@ -87,18 +86,14 @@ def add_routes(app: FastAPI):
         except WebSocketDisconnect:
             manager.disconnect(websocket)
 
-    # Counter for HTMX examples
-    counter_value = 0
 
-    @app.get("/api/health")
+    @app.get("/hc")
     async def health_check():
-        return {"status": "healthy", "connections": len(manager.active_connections)}
+        return "OK"
 
-    @app.post("/api/counter/increment")
-    async def increment_counter():
-        global counter_value
-        counter_value += 1
-        return f"{counter_value}"
+    @app.post("/run-scan")
+    async def force_start_scan():
+        await state.scanner_message_queue.put("scan_now")
 
     @app.post("/api/counter/decrement")
     async def decrement_counter():

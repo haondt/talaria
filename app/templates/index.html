@@ -18,7 +18,8 @@
                 <span class="icon"><i class="fas fa-sync-alt"></i></span>
                 <span>Refresh</span>
             </button>
-            <button class="button is-warning ml-2" id="run-scan-btn">
+            <button class="button is-warning ml-2" id="run-scan-btn"
+                hx-post="/run-scan" hx-swap="none">
                 <span class="icon"><i class="fas fa-play"></i></span>
                 <span>Run Scan Now</span>
             </button>
@@ -53,7 +54,12 @@
     </table>
 </div>
 <div hx-ext="ws" ws-connect="/ws"></div>
-<div class="box mt-4 is-family-monospace" id="scan-output" style="max-height: 500px; min-height: 120px; overflow-y: auto;">
+<div class="box mt-4 is-family-monospace" id="scan-output" style="max-height: 500px; min-height: 120px; overflow-y: auto;"
+    _="
+        on load set my scrollTop to my scrollHeight end
+        on htmx:afterSettle set my scrollTop to my scrollHeight end
+        on htmx:oobAfterSwap from elsewhere set my scrollTop to my scrollHeight end
+    ">
     <div><strong>Scan Output:</strong></div>
     <div>Initializing scan...</div>
     <div>Checking for updates in repository...</div>

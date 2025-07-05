@@ -1,9 +1,11 @@
 import json
+import asyncio
 import threading
 from dataclasses import dataclass, asdict
 from .config import config
 from enum import Enum
 import sqlite3
+import queue
 
 class PipelineStatus(str, Enum):
     UNKNOWN = "unknown"
@@ -29,7 +31,6 @@ class Broadcaster:
     def push(self, msg: str):
         with self._lock:
             listeners = list(self._listeners)
-            print(len(listeners))
         if not listeners:
             return
         for cb in listeners:
@@ -52,6 +53,7 @@ class State:
         self._lock = threading.Lock()
         self._init_db()
         self.broadcaster = Broadcaster()
+        self.scanner_message_queue = asyncio.Queue()
 
     def _get_conn(self):
         return sqlite3.connect(self.db_path, check_same_thread=(not config.is_development))
