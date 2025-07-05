@@ -1,13 +1,21 @@
 import logging
 import asyncio
 import time
+from dataclasses import replace
+
+from .models import DockerComposeTarget, ParsedImage, ParsedTagAndDigest
+
+from . import image_updater
+from . import image_parser
+from . import skopeo
 from . import config
+from . import talaria_git as git
 from .state import state
+from . import docker_compose_file
 _logger = logging.getLogger(__name__)
 
 def start():
     _logger.info("Starting scanner...")
-    # threading.Thread(target=_start, daemon=True).start()
     asyncio.create_task(_start())
     _logger.info("Scanner started.")
 
@@ -33,10 +41,59 @@ async def _start():
             _logger.info("Scheduled scan triggered by timeout.")
             await _run_scan(delay)
 
-
 async def _run_scan(delay):
     try:
         _logger.info("Running scan...")
+        repo = git.TalariaGit()
+        # repo.delete()
+        # repo.clone()
+        docker_compose_files: list[str] = docker_compose_file.get_docker_compose_files()
+        targets: list[DockerComposeTarget] = []
+        for file in docker_compose_files:
+            potential_targets, errors = docker_compose_file.get_images(file)
+            for error in errors:
+                _logger.warning(f'Unable to parse docker compose file image in file {file}: {error}')
+            for target in potential_targets:
+                if target.skip:
+                    _logger.info(f'Skipping image {target.service_key} due to configured skip')
+                else:
+                    targets.append(target)
+
+        async def update_target(target) -> tuple[DockerComposeTarget, ParsedImage, ParsedImage] | None:
+            parsed_image = image_parser.try_parse(target.current_image_string)
+            if not parsed_image:
+                _logger.warn(f'Failed to parse image {target.current_image_string}')
+                return
+
+            _logger.info(f'Checking for updates for {parsed_image}')
+
+            candidate_tags = await image_updater.get_sorted_candidate_tags(parsed_image, target.bump)
+            if len(candidate_tags) == 0:
+                return
+
+            desired_tag = candidate_tags[0]
+            digest, created = await image_updater.get_digest(parsed_image, desired_tag)
+            if not image_updater.is_upgrade(parsed_image.tag_and_digest, desired_tag, digest):
+                return 
+
+            new_image = replace(parsed_image, 
+                tag_and_digest=ParsedTagAndDigest(
+                    tag=desired_tag,
+                    digest=digest
+                )
+            )
+            _logger.info(f'Found upgrade {ParsedImage.diff_string(parsed_image, new_image.tag_and_digest)}')
+            return (target, parsed_image, new_image)
+
+        get_updates_tasks = [update_target(t) for t in targets]
+        results = await asyncio.gather(*get_updates_tasks)
+        results = [i for i in results if i is not None]
+
+        _logger.info(f'Found {len(results)} updates.')
+
+
+
+
         _logger.info("Scan complete.")
     except Exception as e:
         _logger.exception(f"Scan failed. {type(e).__name__}: {e}")

@@ -1,0 +1,3 @@
+<div class="notification is-info" id="next-scan" {% if swap %}hx-swap-oob="true"{% endif %}>
+    <strong>Next scheduled scan:</strong> <span id="next-scan-time">{{ state.next_run | timestamp }}</span>
+</div>

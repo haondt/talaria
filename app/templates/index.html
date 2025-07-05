@@ -5,29 +5,28 @@
 {% endblock %}
 
 {% block content %}
-<div class="notification is-info" id="next-scan">
-    <strong>Next scheduled scan:</strong> <span id="next-scan-time">{{ state.next_run }}</span>
+{% include "next_scan.html" %}
+<div class="level">
+    <div class="level-left">
+        <h2 class="title is-4">Update History</h2>
+    </div>
+    <div class="level-right">
+        <button class="button is-info" id="refresh-btn">
+            <span class="icon"><i class="fas fa-sync-alt"></i></span>
+            <span>Refresh</span>
+        </button>
+        <button class="button is-warning ml-2" id="run-scan-btn"
+            hx-post="/run-scan" hx-swap="none">
+            <span class="icon"><i class="fas fa-play"></i></span>
+            <span>Run Scan Now</span>
+        </button>
+    </div>
 </div>
 <div class="box">
-    <div class="level">
-        <div class="level-left">
-            <h2 class="title is-4">Update History</h2>
-        </div>
-        <div class="level-right">
-            <button class="button is-info" id="refresh-btn">
-                <span class="icon"><i class="fas fa-sync-alt"></i></span>
-                <span>Refresh</span>
-            </button>
-            <button class="button is-warning ml-2" id="run-scan-btn"
-                hx-post="/run-scan" hx-swap="none">
-                <span class="icon"><i class="fas fa-play"></i></span>
-                <span>Run Scan Now</span>
-            </button>
-        </div>
-    </div>
     <table class="table is-fullwidth is-striped">
         <thead>
             <tr>
+                <th>Timestamp</th>
                 <th>Commit Hash</th>
                 <th>Pipeline</th>
                 <th>Status</th>
@@ -54,34 +53,24 @@
     </table>
 </div>
 <div hx-ext="ws" ws-connect="/ws"></div>
-<div class="box mt-4 is-family-monospace" id="scan-output" style="max-height: 500px; min-height: 120px; overflow-y: auto;"
+<div class="level mt-4">
+    <div class="level-left">
+        <h2 class="title is-4">Scan Output</h2>
+    </div>
+    <div class="level-right">
+        <button class="button is-small is-danger" id="clear-logs-btn"
+            _="on click set #scan-output's innerHTML to ''">
+            <span class="icon"><i class="fas fa-trash"></i></span>
+            <span>Clear Logs</span>
+        </button>
+    </div>
+</div>
+<div class="box is-family-monospace is-size-7" id="scan-output" style="max-height: 500px; min-height: 120px; overflow-y: auto;"
     _="
         on load set my scrollTop to my scrollHeight end
         on htmx:afterSettle set my scrollTop to my scrollHeight end
         on htmx:oobAfterSwap from elsewhere set my scrollTop to my scrollHeight end
     ">
-    <div><strong>Scan Output:</strong></div>
-    <div>Initializing scan...</div>
-    <div>Checking for updates in repository...</div>
-    <div>Found 2 docker-compose files.</div>
-    <div>Checking images with skopeo...</div>
-    <div>No updates found. Scan complete.</div>
 </div>
 {% endblock %}
 
-{% block extra_scripts %}
-<script>
-    // Placeholder for refresh button logic
-    document.getElementById('refresh-btn').addEventListener('click', function() {
-        // TODO: Add AJAX/HTMX logic to refresh update history
-        alert('Refresh triggered (to be implemented)');
-    });
-    // Placeholder for run scan now button logic
-    document.getElementById('run-scan-btn').addEventListener('click', function() {
-        // TODO: Add AJAX/HTMX logic to trigger scan
-        alert('Run Scan Now triggered (to be implemented)');
-    });
-    // Placeholder: Set next scan time (to be replaced with dynamic value)
-    document.getElementById('next-scan-time').textContent = '2024-06-10 12:00 UTC';
-</script>
-{% endblock %} 

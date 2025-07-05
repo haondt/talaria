@@ -30,7 +30,8 @@ class Config:
         self.log_template = os.getenv('TL_LOG_TEMPLATE', '%(name)s: %(message)s' if self.is_development else '[%(asctime)s] [%(levelname)s] [%(name)s]: %(message)s')
         self.log_level = os.getenv('TL_LOG_LEVEL', 'INFO')
         self.server_port = int(os.getenv('TL_SERVER_PORT', 5001))
-        self.db_path = os.getenv('TL_DB_PATH', 'talaria.db')
+        self.db_path = os.getenv('TL_DB_PATH', '/data/talaria.db')
+        self.db_path = os.path.abspath(self.db_path)
         self.webhook_api_key = os.getenv('TL_WEBHOOK_API_KEY', '57d88647-208e-4ee1-88fc-365836f95ee4')
 
         update_delay = os.getenv('TL_UPDATE_DELAY', '1d')
@@ -38,13 +39,21 @@ class Config:
 
         self.broadcast_loggers = [
             'app.talaria_git',
-            'app.scanner'
+            'app.scanner',
+            'app.docker_compose_file'
         ]
 
-        self.git_repo_path = os.getenv('TL_GIT_REPO_PATH', 'data/repository')
+        self.git_repo_path = os.getenv('TL_GIT_REPO_PATH', '/data/repository')
+        self.git_repo_path = os.path.abspath(self.git_repo_path)
         self.git_repo_url = os.environ['TL_GIT_REPO_URL']
         self.git_branch = os.getenv('TL_GIT_BRANCH', 'main')
         self.git_auth_token = os.getenv('TL_GIT_AUTH_TOKEN')
+
+        self.docker_compose_file_pattern = os.getenv('TL_DOCKER_COMPOSE_FILE_PATTERN', 'docker-compose*.y*ml')
+
+        self.valid_releases = os.getenv('TL_VALID_RELEASES', 'latest|stable|mainline|develop')
+        self.enable_talos_short_form_compatibility = parse_bool_env_var('TL_TALOS_SHORT_FORM_COMPAT', False)
+        self.maximum_concurrent_pushes = int(os.getenv('TL_MAX_CONCURRENT_PUSHES', 5))
 
     def should_broadcast_logger(self, logger_name: str) -> bool:
         return any(logger_name.startswith(broadcast_logger) for broadcast_logger in self.broadcast_loggers)

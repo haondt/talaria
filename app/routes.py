@@ -6,6 +6,7 @@ from .state import state
 import asyncio
 from .config import config
 from . import gitlab
+from . import jinja_filters
 
 _logger = logging.getLogger(__name__)
 
@@ -34,10 +35,39 @@ class ConnectionManager:
 
 def add_routes(app: FastAPI):
     templates = Jinja2Templates(directory="app/templates")
+    jinja_filters.add_filters(templates)
     manager = ConnectionManager()
 
     def broadcaster_listener(msg: str):
         nonlocal manager
+        # if "[INFO]" in msg, then msg = <span>msg up to [INFO]</span><span class="has-text-info">[INFO]</span></span>msg for everything after [INFO]</span>
+        log_levels = [
+            ("[INFO]", "has-text-info"),
+            ("[WARNING]", "has-text-warning"),
+            ("[ERROR]", "has-text-danger"),
+            ("[DEBUG]", "has-text-grey")
+        ]
+
+        for level, color_class in log_levels:
+            if level in msg:
+                parts = msg.split(level, 1)
+                if len(parts) == 2:
+                    before_level, after_level = parts
+                    html = f"""
+                        <div id='scan-output' hx-swap-oob='beforeend'>
+                            <div><span>{before_level}</span><span class="{color_class}">{level}</span><span>{after_level}</span></div>
+                        </div>
+                    """
+                else:
+                    html = f"""
+                        <div id='scan-output' hx-swap-oob='beforeend'>
+                            <div>{msg}</div>
+                        </div>
+                    """
+                asyncio.create_task(manager.broadcast(html))
+                return
+
+        # No log level found, use default format
         html = f"""
             <div id='scan-output' hx-swap-oob='beforeend'>
                 <div>{msg}</div>
@@ -75,7 +105,7 @@ def add_routes(app: FastAPI):
             while True:
                 data = await websocket.receive_text()
                 # message_data = json.loads(data)
-                
+
                 # Broadcast the message to all connected clients
                 # await manager.broadcast(json.dumps({
                 #     "type": "message",
@@ -92,8 +122,9 @@ def add_routes(app: FastAPI):
         return "OK"
 
     @app.post("/run-scan")
-    async def force_start_scan():
+    async def force_start_scan(request: Request):
         await state.scanner_message_queue.put("scan_now")
+        return templates.TemplateResponse("next_scan.html", {"request": request, "state": state, "swap": True})
 
     @app.post("/api/counter/decrement")
     async def decrement_counter():

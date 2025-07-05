@@ -3,7 +3,6 @@ from . import routes
 from .config import  config
 import logging, datetime
 
-# Custom logging filter that broadcasts certain log messages
 class BroadcastFilter(logging.Filter):
     def __init__(self, state):
         super().__init__()
@@ -11,10 +10,10 @@ class BroadcastFilter(logging.Filter):
 
     def filter(self, record):
         if config.should_broadcast_logger(record.name):
-            message = f"[{record.name}] {record.getMessage()}"
+
+            message = f"[{record.levelname}] [{record.name}] {record.getMessage()}"
             self.state.broadcaster.push(message)
         return False
-
 
 logging.Formatter.formatTime = (lambda self, record, datefmt=None: datetime.datetime.fromtimestamp(record.created, datetime.timezone.utc).astimezone().isoformat(sep="T",timespec="milliseconds"))
 
