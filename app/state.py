@@ -21,11 +21,37 @@ class CommitInfo:
     pipeline_timestamp: float | None
     pipeline_duration: float | None
 
+class Broadcaster:
+    def __init__(self):
+        self._listeners = set()
+        self._lock = threading.Lock()
+
+    def push(self, msg: str):
+        with self._lock:
+            listeners = list(self._listeners)
+            print(len(listeners))
+        if not listeners:
+            return
+        for cb in listeners:
+            try:
+                cb(msg)
+            except Exception:
+                pass
+
+    def register(self, cb):
+        with self._lock:
+            self._listeners.add(cb)
+
+    def unregister(self, cb):
+        with self._lock:
+            self._listeners.discard(cb)
+
 class State:
     def __init__(self):
         self.db_path = config.db_path
         self._lock = threading.Lock()
         self._init_db()
+        self.broadcaster = Broadcaster()
 
     def _get_conn(self):
         return sqlite3.connect(self.db_path, check_same_thread=(not config.is_development))

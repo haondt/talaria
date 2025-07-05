@@ -1,9 +1,12 @@
-from fastapi import FastAPI, Request, WebSocket, WebSocketDisconnect
+from fastapi import FastAPI, Request, WebSocket, WebSocketDisconnect, status
 from fastapi.templating import Jinja2Templates
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, Response
 import logging
 import json
 from .state import state
+import asyncio
+from .config import config
+from . import gitlab
 
 _logger = logging.getLogger(__name__)
 
@@ -34,13 +37,37 @@ def add_routes(app: FastAPI):
     templates = Jinja2Templates(directory="app/templates")
     manager = ConnectionManager()
 
+    def broadcaster_listener(msg: str):
+        nonlocal manager
+        html = f"""
+            <div id='scan-output' hx-swap-oob='beforeend'>
+                <div>{msg}</div>
+            </div>
+        """
+        asyncio.create_task(manager.broadcast(html))
+    state.broadcaster.register(broadcaster_listener)
+
     @app.get("/", response_class=HTMLResponse)
     async def root(request: Request):
         return templates.TemplateResponse("index.html", {"request": request, "state": state})
 
-    @app.get("/chat", response_class=HTMLResponse)
-    async def chat_page(request: Request):
-        return templates.TemplateResponse("chat.html", {"request": request})
+    @app.post("/api/webhooks/gitlab", response_class=HTMLResponse)
+    async def gitlab_webhook(request: Request):
+        auth = request.headers.get("authorization")
+        if not auth or not auth.lower().startswith("bearer ") or auth[7:] != config.webhook_api_key:
+            return Response(status_code=status.HTTP_401_UNAUTHORIZED)
+
+        body = (await request.body()).decode('utf-8')
+        _logger.info(f"GitLab webhook body: {body}")
+        try:
+            data = await request.json()
+        except Exception:
+            _logger.error(f"Failed to parse GitLab webhook body as json")
+            return Response(status_code=400)
+
+        event = request.headers.get("x-gitlab-event")
+        gitlab.handle_deployment_webhook(data, event)
+        return Response(status_code=200)
 
     @app.websocket("/ws")
     async def websocket_endpoint(websocket: WebSocket):

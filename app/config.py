@@ -15,5 +15,6 @@ class Config:
         self.log_level = os.getenv('TL_LOG_LEVEL', 'INFO')
         self.server_port = int(os.getenv('TL_SERVER_PORT', 5001))
         self.db_path = os.getenv('TL_DB_PATH', 'talaria.db')
+        self.webhook_api_key = os.getenv('TL_WEBHOOK_API_KEY', '57d88647-208e-4ee1-88fc-365836f95ee4')
 
 config = Config()
