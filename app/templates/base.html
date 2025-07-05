@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Talaria{% endblock %}</title>
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.4/css/bulma.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/htmx.org@2.0.6/dist/htmx.min.js"></script>
+    <script src="https://unpkg.com/hyperscript.org@0.9.14"></script>
+    <meta
+        name="htmx-config"
+        content='{
+            "responseHandling":[
+                {"code":"401", "swap":true},
+                {"code":"200", "swap":true}
+            ],
+            "scrollIntoViewOnBoost": false
+        }'
+    />
+    
+    {% block extra_head %}{% endblock %}
+</head>
+<body>
+    <nav class="navbar is-primary" role="navigation" aria-label="main navigation">
+        <div class="navbar-brand">
+            <a class="navbar-item" href="/">
+                <span class="ml-2">Talaria</span>
+            </a>
+        </div>
+    </nav>
+
+    <main class="section">
+        <div class="container">
+            {% block content %}{% endblock %}
+        </div>
+    </main>
+
+    <footer class="section"></footer>
+</body>
+</html> 

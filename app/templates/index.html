@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+
+{% block extra_head %}
+ <script src="https://cdn.jsdelivr.net/npm/htmx-ext-ws@2.0.2" crossorigin="anonymous"></script>
+{% endblock %}
+
+{% block content %}
+<div class="notification is-info" id="next-scan">
+    <strong>Next scheduled scan:</strong> <span id="next-scan-time">{{ state.next_run }}</span>
+</div>
+<div class="box">
+    <div class="level">
+        <div class="level-left">
+            <h2 class="title is-4">Update History</h2>
+        </div>
+        <div class="level-right">
+            <button class="button is-info" id="refresh-btn">
+                <span class="icon"><i class="fas fa-sync-alt"></i></span>
+                <span>Refresh</span>
+            </button>
+            <button class="button is-warning ml-2" id="run-scan-btn">
+                <span class="icon"><i class="fas fa-play"></i></span>
+                <span>Run Scan Now</span>
+            </button>
+        </div>
+    </div>
+    <table class="table is-fullwidth is-striped">
+        <thead>
+            <tr>
+                <th>Commit Hash</th>
+                <th>Pipeline</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody id="update-history">
+            <!-- Example static rows, to be replaced with dynamic content -->
+            <tr>
+                <td><code>abc1234</code></td>
+                <td><a href="#" target="_blank">View Pipeline</a></td>
+                <td><span class="tag is-light">Unknown</span></td>
+            </tr>
+            <tr>
+                <td><code>def5678</code></td>
+                <td><a href="#" target="_blank">View Pipeline</a></td>
+                <td><span class="tag is-success">Success</span></td>
+            </tr>
+            <tr>
+                <td><code>ghi9012</code></td>
+                <td><a href="#" target="_blank">View Pipeline</a></td>
+                <td><span class="tag is-danger">Failure</span></td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div hx-ext="ws" ws-connect="/ws" class="">
+</div>
+<div class="box mt-4" id="scan-output" style="background: #222; color: #eee; min-height: 120px; font-family: monospace; overflow-y: auto;">
+    <div><strong>Scan Output:</strong></div>
+    <div>Initializing scan...</div>
+    <div>Checking for updates in repository...</div>
+    <div>Found 2 docker-compose files.</div>
+    <div>Checking images with skopeo...</div>
+    <div>No updates found. Scan complete.</div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    // Placeholder for refresh button logic
+    document.getElementById('refresh-btn').addEventListener('click', function() {
+        // TODO: Add AJAX/HTMX logic to refresh update history
+        alert('Refresh triggered (to be implemented)');
+    });
+    // Placeholder for run scan now button logic
+    document.getElementById('run-scan-btn').addEventListener('click', function() {
+        // TODO: Add AJAX/HTMX logic to trigger scan
+        alert('Run Scan Now triggered (to be implemented)');
+    });
+    // Placeholder: Set next scan time (to be replaced with dynamic value)
+    document.getElementById('next-scan-time').textContent = '2024-06-10 12:00 UTC';
+</script>
+{% endblock %} 
