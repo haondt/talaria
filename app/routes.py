@@ -43,7 +43,6 @@ def add_routes(app: FastAPI):
 
     def broadcaster_listener(msg: str):
         nonlocal manager
-        # if "[INFO]" in msg, then msg = <span>msg up to [INFO]</span><span class="has-text-info">[INFO]</span></span>msg for everything after [INFO]</span>
         log_levels = [
             ("[INFO]", "has-text-info"),
             ("[WARNING]", "has-text-warning"),

@@ -35,7 +35,10 @@ class TalariaGit:
         stdout, stderr = await process.communicate()
         
         if process.returncode != 0:
-            _logger.error(f"Git command failed: {stderr}")
+            log_message = f"Git command failed: {stderr}"
+            if self.auth_token in log_message:
+                log_message = log_message.replace(self.auth_token, '<git-auth-token>')
+            _logger.error(log_message)
             raise subprocess.CalledProcessError(process.returncode or 1, cmd, stdout, stderr)
         
         return stdout.strip().decode('utf-8')
