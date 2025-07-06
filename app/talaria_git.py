@@ -19,7 +19,11 @@ class TalariaGit:
         if cwd is None:
             cwd = self.repo_path
         cmd = ['git'] + list(args)
-        _logger.info(f"Running git command: {' '.join(cmd)}")
+
+        log_message = f"Running git command: {' '.join(cmd)}"
+        if self.auth_token in log_message:
+            log_message = log_message.replace(self.auth_token, '<git-auth-token>')
+        _logger.info(log_message)
         
         process = await asyncio.create_subprocess_exec(
             *cmd,
@@ -50,8 +54,13 @@ class TalariaGit:
         # Create parent directory if it doesn't exist
         self.repo_path.mkdir(parents=True, exist_ok=True)
         
+        # Use authenticated URL if token is present
+        clone_url = self.repo_url
+        if self.auth_token:
+            clone_url = self.repo_url.replace('https://', f'https://oauth2:{self.auth_token}@')
+        
         # Clone with depth=1 for shallow clone
-        await self._run_git('clone', '--depth', '1', '--branch', self.branch, self.repo_url, str(self.repo_path))
+        await self._run_git('clone', '--depth', '1', '--branch', self.branch, clone_url, str(self.repo_path))
         _logger.info(f"Cloned repository to {self.repo_path}")
 
     async def add(self, files=None):

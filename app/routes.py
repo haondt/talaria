@@ -9,6 +9,7 @@ from .config import config
 from . import gitlab
 from . import jinja_filters
 import os
+import html
 
 _logger = logging.getLogger(__name__)
 
@@ -55,27 +56,29 @@ def add_routes(app: FastAPI):
                 parts = msg.split(level, 1)
                 if len(parts) == 2:
                     before_level, after_level = parts
-                    html = f"""
+                    level, before_level, after_level = html.escape(level), html.escape(before_level), html.escape(after_level)
+                    text = f"""
                         <div id='scan-output' hx-swap-oob='beforeend'>
                             <div><span>{before_level}</span><span class="{color_class}">{level}</span><span>{after_level}</span></div>
                         </div>
                     """
                 else:
-                    html = f"""
+                    msg = html.escape(msg)
+                    text = f"""
                         <div id='scan-output' hx-swap-oob='beforeend'>
                             <div>{msg}</div>
                         </div>
                     """
-                asyncio.create_task(manager.broadcast(html))
+                asyncio.create_task(manager.broadcast(text))
                 return
 
         # No log level found, use default format
-        html = f"""
+        text = f"""
             <div id='scan-output' hx-swap-oob='beforeend'>
                 <div>{msg}</div>
             </div>
         """
-        asyncio.create_task(manager.broadcast(html))
+        asyncio.create_task(manager.broadcast(text))
     state.broadcaster.register(broadcaster_listener)
 
     @app.get("/", response_class=HTMLResponse)

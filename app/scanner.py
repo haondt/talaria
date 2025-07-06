@@ -49,7 +49,6 @@ async def _run_scan(delay):
         repo.delete()
         await repo.clone()
         await repo.setup_environment()
-        await repo.setup_auth()
 
         docker_compose_files: list[str] = docker_compose_file.get_docker_compose_files()
         targets: list[DockerComposeTarget] = []

@@ -4,7 +4,8 @@ WORKDIR /app
 
 RUN apk add \
     git \
-    skopeo
+    skopeo \
+    su-exec
 
 
 RUN addgroup -S talaria && adduser -S talaria -G talaria
