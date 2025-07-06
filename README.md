@@ -1,11 +1,11 @@
-# Talaria
+# talaria
 
 [![Pipeline Status](https://img.shields.io/badge/pipeline-success-brightgreen)](https://gitlab.com/haondt/talaria/-/pipelines)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-**Talaria** is an intelligent Docker image updater that automatically scans your Docker Compose files, checks for newer image versions, and creates Git commits with the updates. It provides a modern web interface for monitoring and controlling the update process.
+**talaria** is an intelligent Docker image updater that automatically scans your Docker Compose files, checks for newer image versions, and creates Git commits with the updates. It provides a modern web interface for monitoring and controlling the update process.
 
-Talaria is heavily based on [Talos](https://gitlab.com/haondt/talos), but is lighter weight and includes just a subset of Talos' features.
+talaria is heavily based on [Talos](https://gitlab.com/haondt/talos), but is lighter weight and includes just a subset of Talos' features.
 
 ![](./docs/image.png)
 
@@ -122,7 +122,7 @@ Configuration supports flexible time spans:
 
 ### Docker Compose Extensions
 
-Talaria supports custom extensions in Docker Compose files to control update behavior:
+talaria supports custom extensions in Docker Compose files to control update behavior:
 
 #### x-talaria Extension (Recommended)
 
@@ -219,7 +219,7 @@ services:
 
 ## 🔗 GitLab Webhooks
 
-Talaria can receive webhook notifications from GitLab to update pipeline status for commits. This allows the web interface to show whether commits have passed or failed their CI/CD pipelines.
+talaria can receive webhook notifications from GitLab to update pipeline status for commits. This allows the web interface to show whether commits have passed or failed their CI/CD pipelines.
 
 ### Webhook Configuration
 
@@ -239,7 +239,7 @@ Talaria can receive webhook notifications from GitLab to update pipeline status 
 
 ### Pipeline Status Updates
 
-When GitLab sends pipeline events, Talaria will:
+When GitLab sends pipeline events, talaria will:
 
 1. **Parse the webhook payload** to extract commit hash and pipeline information
 2. **Update the commit record** in the database with:
@@ -269,7 +269,7 @@ Access the web interface at `http://localhost:5001`:
 
 ### Docker Compose Integration
 
-Talaria automatically scans Docker Compose files matching the configured pattern. It supports:
+talaria automatically scans Docker Compose files matching the configured pattern. It supports:
 
 - **Multiple files**: Scans all matching compose files
 - **Service filtering**: Skip specific services via configuration
@@ -278,7 +278,7 @@ Talaria automatically scans Docker Compose files matching the configured pattern
 
 ### Git Integration
 
-When updates are found, Talaria:
+When updates are found, talaria:
 
 1. Clones the repository (shallow clone for efficiency)
 2. Updates Docker Compose files with new image versions

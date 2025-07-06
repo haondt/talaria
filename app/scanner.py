@@ -98,7 +98,7 @@ async def _run_scan(delay):
 
         if len(results) > 0:
             _logger.info('Applying changes to git repo')
-            commit_title = "[Talaria] Updating images"
+            commit_title = "[talaria] Updating images"
             changes = []
             for (target, old_image, new_image) in results:
                 docker_compose_file.apply_update(target, str(new_image))
