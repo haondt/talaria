@@ -9,40 +9,9 @@ talaria is heavily based on [Talos](https://gitlab.com/haondt/talos), but is lig
 
 ![](./docs/image.png)
 
-## 🚀 Features
-
-### Core Functionality
-- **Automated Image Updates**: Scans Docker Compose files for outdated images and updates them
-- **Semantic Versioning**: Intelligent version comparison with support for patch, minor, and major updates
-- **Git Integration**: Automatic commit creation and pushing to configured repositories
-- **Web Interface**: Real-time monitoring with HTMX-powered updates
-- **Caching**: Smart caching of skopeo commands to reduce API calls
-- **Authentication**: Support for Docker Hub authentication to access private images
-
-### Web Interface
-- **Real-time Updates**: Live WebSocket updates of scan progress
-- **Update History**: Paginated view of all commit history with pipeline status
-- **Manual Triggers**: Ability to run scans on-demand
-- **Responsive Design**: Modern UI built with Bulma CSS framework
-- **Dark Theme**: Optimized for dark mode viewing
-
-### Advanced Features
-- **Configurable Update Policies**: Control which types of updates to apply
-- **Concurrent Processing**: Multiple image updates processed simultaneously
-- **Error Handling**: Robust error handling with detailed logging
-- **Database Persistence**: SQLite-based state management
-- **Docker Support**: Containerized deployment with Alpine Linux
-
 ## 🛠️ Installation
 
-### Prerequisites
-
-- Python 3.13+
-- Git
-- Skopeo
-- Docker (for containerized deployment)
-
-### Docker Deployment (Recommended)
+### Docker Compose (Recommended)
 
 ```yml
 services:
@@ -54,7 +23,6 @@ volumes:
   talaria-data:
 ```
 
-
 ### Local Development
 
 1. **Install dependencies**:
@@ -64,11 +32,7 @@ volumes:
 
 2. **Install system dependencies**:
    ```bash
-   # Ubuntu/Debian
    sudo apt-get install git skopeo
-   
-   # Alpine
-   apk add git skopeo
    ```
 
 3. **Set up environment**:
@@ -81,6 +45,17 @@ volumes:
    ```bash
    python -m app
    ```
+
+## 🚀 Features
+
+- **Automated Image Updates**: Scans Docker Compose files for outdated images and updates them
+- **Semantic Versioning**: Intelligent version comparison with support for patch, minor, and major updates
+- **Git Integration**: Automatic commit creation and pushing to configured repositories
+- **Web Interface**: Real-time monitoring with HTMX-powered updates
+- **Authentication**: Support for Docker Hub authentication to access private images and increase pull limits
+- **Manual Triggers**: Ability to run scans on-demand
+- **Configurable Update Policies**: Control which types of updates to apply
+
 
 ## ⚙️ Configuration
 
@@ -115,10 +90,8 @@ volumes:
 ### Time Span Format
 
 Configuration supports flexible time spans:
-- `30d` - 30 days
-- `1h` - 1 hour  
-- `30s` - 30 seconds
-- `1d2h30m` - 1 day 2 hours 30 minutes
+- `1h30m` - 1 hour 30 minutes
+- `1d 2h 30m 40s` - 1 day 2 hours 30 minutes 40 seconds
 
 ### Docker Compose Extensions
 
@@ -260,30 +233,7 @@ The web interface will automatically show:
 
 ### Web Interface
 
-Access the web interface at `http://localhost:5001`:
-
-- **Dashboard**: View current status and next scan time
-- **Update History**: Browse commit history with pagination
-- **Manual Scan**: Trigger immediate scans
-- **Real-time Logs**: Monitor scan progress via WebSocket
-
-### Docker Compose Integration
-
-talaria automatically scans Docker Compose files matching the configured pattern. It supports:
-
-- **Multiple files**: Scans all matching compose files
-- **Service filtering**: Skip specific services via configuration
-- **Version policies**: Control update types (patch/minor/major)
-- **Image parsing**: Handles complex image references with digests
-
-### Git Integration
-
-When updates are found, talaria:
-
-1. Clones the repository (shallow clone for efficiency)
-2. Updates Docker Compose files with new image versions
-3. Creates a commit with descriptive message
-4. Pushes changes to the configured branch
+Access the web interface at `http://localhost:5001`
 
 ## 📄 License
 
