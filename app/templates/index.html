@@ -33,22 +33,36 @@
             </tr>
         </thead>
         <tbody id="update-history">
-            <!-- Example static rows, to be replaced with dynamic content -->
+            {% for commit_hash, commit_info in state.commit.items() %}
             <tr>
-                <td><code>abc1234</code></td>
-                <td><a href="#" target="_blank">View Pipeline</a></td>
-                <td><span class="tag is-light">Unknown</span></td>
+                <td>{{ commit_info.commit_timestamp | timestamp }}</td>
+                <td><code>{{ commit_info.commit_short_hash }}</code></td>
+                <td>
+                    {% if commit_info.pipeline_url %}
+                    <a href="{{ commit_info.pipeline_url }}" target="_blank">View Pipeline</a>
+                    {% else %}
+                    <span class="has-text-grey">No pipeline</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if commit_info.pipeline_status.value == "unknown" %}
+                    <span class="tag is-dark">Unknown</span>
+                    {% elif commit_info.pipeline_status.value == "success" %}
+                    <span class="tag is-success">Success</span>
+                    {% elif commit_info.pipeline_status.value == "failure" %}
+                    <span class="tag is-danger">Failure</span>
+                    {% else %}
+                    <span class="tag is-dark">{{ commit_info.pipeline_status.value | title }}</span>
+                    {% endif %}
+                </td>
             </tr>
+            {% else %}
             <tr>
-                <td><code>def5678</code></td>
-                <td><a href="#" target="_blank">View Pipeline</a></td>
-                <td><span class="tag is-success">Success</span></td>
+                <td colspan="4" class="has-text-centered has-text-grey">
+                    No commits found
+                </td>
             </tr>
-            <tr>
-                <td><code>ghi9012</code></td>
-                <td><a href="#" target="_blank">View Pipeline</a></td>
-                <td><span class="tag is-danger">Failure</span></td>
-            </tr>
+            {% endfor %}
         </tbody>
     </table>
 </div>

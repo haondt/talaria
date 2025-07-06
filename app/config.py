@@ -55,6 +55,19 @@ class Config:
         self.enable_talos_short_form_compatibility = parse_bool_env_var('TL_TALOS_SHORT_FORM_COMPAT', False)
         self.maximum_concurrent_pushes = int(os.getenv('TL_MAX_CONCURRENT_PUSHES', 5))
 
+        # Skopeo cache settings
+        skopeo_cache_duration = os.getenv('TL_SKOPEO_CACHE_DURATION', '12h')
+        self.skopeo_cache_duration = parse_timespan(skopeo_cache_duration).total_seconds()
+        
+        skopeo_cache_variance = os.getenv('TL_SKOPEO_CACHE_VARIANCE', '0.1')
+        self.skopeo_cache_variance = float(skopeo_cache_variance)
+        
+        # Docker.io authentication for skopeo
+        self.docker_username = os.getenv('TL_DOCKER_USERNAME')
+        self.docker_password = os.getenv('TL_DOCKER_PASSWORD')
+        self.docker_auth_file = os.getenv('TL_DOCKER_AUTH_FILE', '/data/skopeo-auth.json')
+        self.docker_auth_file = os.path.abspath(self.docker_auth_file)
+
     def should_broadcast_logger(self, logger_name: str) -> bool:
         return any(logger_name.startswith(broadcast_logger) for broadcast_logger in self.broadcast_loggers)
 
