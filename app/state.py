@@ -206,7 +206,7 @@ class State:
                 
                 if row:
                     result, expiration_time = row
-                    max_expiration = current_time + config.skopeo_cache_duration
+                    max_expiration = current_time + (config.skopeo_cache_duration * (1.0 + config.skopeo_cache_variance))
                     if current_time < expiration_time and expiration_time <= max_expiration:
                         return result
                     else:
