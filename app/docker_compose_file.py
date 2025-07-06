@@ -99,7 +99,7 @@ def _find_x_config(lines: list[str], current_line_num: int, current_indent: int)
                 # Parse x-talos configuration
                 return _parse_x_talaria_config(lines, i, current_indent)
     
-    raise ValueError(f"Unable to find talos configuration")
+    raise ValueError(f"Unable to find talaria configuration")
 
 def _parse_x_talaria_config(lines: list[str], start_line: int, base_indent: int) -> tuple[BumpSize, bool]:
     """Parse x-talos configuration block"""
