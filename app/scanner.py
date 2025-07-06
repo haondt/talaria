@@ -47,9 +47,9 @@ async def _run_scan(delay):
 
         repo = git.TalariaGit()
         repo.delete()
-        repo.clone()
-        repo.setup_environment()
-        repo.setup_auth()
+        await repo.clone()
+        await repo.setup_environment()
+        await repo.setup_auth()
 
         docker_compose_files: list[str] = docker_compose_file.get_docker_compose_files()
         targets: list[DockerComposeTarget] = []
@@ -105,15 +105,14 @@ async def _run_scan(delay):
                 changes.append(ParsedImage.diff_string(old_image, new_image.tag_and_digest))
             commit_body = '\n'.join(changes)
 
-            repo.add()
-            repo.commit(commit_title, commit_body)
-            repo.push()
+            await repo.add()
+            await repo.commit(commit_title, commit_body)
+            await repo.push()
 
-
-            sha = repo.get_current_commit()
+            sha = await repo.get_current_commit()
             state.commit[sha] = CommitInfo(
                 commit_hash=sha,
-                commit_short_hash=repo.get_short_commit(),
+                commit_short_hash=await repo.get_short_commit(),
                 commit_url=None,
                 commit_timestamp=time.time(),
                 pipeline_url=None,
