@@ -80,7 +80,7 @@ def add_routes(app: FastAPI):
     async def root(request: Request):
         # Get pagination parameters
         page = int(request.query_params.get("page", 1))
-        per_page = int(request.query_params.get("per_page", 2))
+        per_page = int(request.query_params.get("per_page", config.default_update_history_page_size))
         
         # Ensure page is at least 1
         page = max(1, page)
@@ -133,16 +133,7 @@ def add_routes(app: FastAPI):
         await manager.connect(websocket)
         try:
             while True:
-                data = await websocket.receive_text()
-                # message_data = json.loads(data)
-
-                # Broadcast the message to all connected clients
-                # await manager.broadcast(json.dumps({
-                #     "type": "message",
-                #     "user": message_data.get("user", "Anonymous"),
-                #     "message": message_data.get("message", ""),
-                #     "timestamp": message_data.get("timestamp", "")
-                # }))
+                _ = await websocket.receive_text()
         except WebSocketDisconnect:
             manager.disconnect(websocket)
 
@@ -156,39 +147,3 @@ def add_routes(app: FastAPI):
         await state.scanner_message_queue.put("scan_now")
         return templates.TemplateResponse("next_scan.html", {"request": request, "state": state, "swap": True})
 
-    @app.post("/api/counter/decrement")
-    async def decrement_counter():
-        global counter_value
-        counter_value -= 1
-        return f"{counter_value}"
-
-    @app.post("/api/counter/reset")
-    async def reset_counter():
-        global counter_value
-        counter_value = 0
-        return f"{counter_value}"
-
-    @app.get("/api/realtime-data")
-    async def get_realtime_data():
-        import time
-        return f"""
-        <div class="notification is-info">
-            <i class="fas fa-clock"></i>
-            <strong>Last Updated:</strong> {time.strftime('%H:%M:%S')}
-        </div>
-        <div class="content">
-            <p><strong>Active Connections:</strong> {len(manager.active_connections)}</p>
-            <p><strong>Counter Value:</strong> {counter_value}</p>
-            <p><strong>Server Time:</strong> {time.strftime('%Y-%m-%d %H:%M:%S')}</p>
-        </div>
-        """
-
-    @app.post("/api/notify")
-    async def send_notification():
-        return """
-        <div class="notification is-success">
-            <button class="delete" onclick="this.parentElement.remove()"></button>
-            <i class="fas fa-bell"></i>
-            <strong>Notification sent!</strong> This is a test notification.
-        </div>
-        """

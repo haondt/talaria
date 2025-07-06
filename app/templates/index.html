@@ -31,7 +31,7 @@
         <thead>
             <tr>
                 <th>Timestamp</th>
-                <th>Commit Hash</th>
+                <th>Commit</th>
                 <th>Pipeline</th>
                 <th>Status</th>
             </tr>
@@ -40,7 +40,15 @@
             {% for commit_hash, commit_info in commits %}
             <tr>
                 <td>{{ commit_info.commit_timestamp | timestamp }}</td>
-                <td><code>{{ commit_info.commit_short_hash }}</code></td>
+                <td>
+                    {% if commit_info.commit_url %}
+                    <a href="{{ commit_info.commit_url }}">
+                        <code class="has-text-link is-underlined">{{ commit_info.commit_short_hash }}</code>
+                    </a>
+                    {% else %}
+                    <code>{{ commit_info.commit_short_hash }}</code>
+                    {% endif %}
+                </td>
                 <td>
                     {% if commit_info.pipeline_url %}
                     <a href="{{ commit_info.pipeline_url }}" target="_blank">View Pipeline</a>

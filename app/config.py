@@ -68,6 +68,8 @@ class Config:
         self.docker_auth_file = os.getenv('TL_DOCKER_AUTH_FILE', '/data/skopeo-auth.json')
         self.docker_auth_file = os.path.abspath(self.docker_auth_file)
 
+        self.default_update_history_page_size = os.getenv('TL_HISTORY_PAGE_SIZE', 5)
+
     def should_broadcast_logger(self, logger_name: str) -> bool:
         return any(logger_name.startswith(broadcast_logger) for broadcast_logger in self.broadcast_loggers)
 
