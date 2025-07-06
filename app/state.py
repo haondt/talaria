@@ -149,11 +149,26 @@ class State:
             result = self.__getitem__(commit_hash)
             return result if result is not None else default
 
-        def items(self) -> list[tuple[str, CommitInfo]]:
-            """Get all commits as (commit_hash, CommitInfo) pairs"""
+        def items(self, page: int = 1, per_page: int = 20) -> tuple[list[tuple[str, CommitInfo]], int]:
+            """Get paginated commits as (commit_hash, CommitInfo) pairs and total count"""
             with self.state._lock, self.state._get_conn() as conn:
                 c = conn.cursor()
-                c.execute('SELECT commit_hash, data, commit_timestamp FROM commits ORDER BY commit_timestamp DESC, commit_hash')
+                
+                # Get total count
+                c.execute('SELECT COUNT(*) FROM commits')
+                total_count = c.fetchone()[0]
+                
+                # Calculate offset
+                offset = (page - 1) * per_page
+                
+                # Get paginated results
+                c.execute('''
+                    SELECT commit_hash, data, commit_timestamp 
+                    FROM commits 
+                    ORDER BY commit_timestamp DESC, commit_hash 
+                    LIMIT ? OFFSET ?
+                ''', (per_page, offset))
+                
                 rows = c.fetchall()
                 items = []
                 for commit_hash, data, commit_timestamp in rows:
@@ -165,7 +180,8 @@ class State:
                         data_dict['commit_timestamp'] = commit_timestamp
                     commit_info = CommitInfo(**data_dict)
                     items.append((commit_hash, commit_info))
-                return items
+                
+                return items, total_count
 
     class SkopeoCacheDict:
         def __init__(self, state):

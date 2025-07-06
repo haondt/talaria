@@ -11,7 +11,11 @@
         <h2 class="title is-4">Update History</h2>
     </div>
     <div class="level-right">
-        <button class="button is-info" id="refresh-btn">
+        <button class="button is-info" id="refresh-btn"
+            hx-get="/"
+            hx-target="#update-history"
+            hx-select="#update-history"
+            hx-swap="outerHTML" >
             <span class="icon"><i class="fas fa-sync-alt"></i></span>
             <span>Refresh</span>
         </button>
@@ -22,7 +26,7 @@
         </button>
     </div>
 </div>
-<div class="box">
+<div class="box" id="update-history">
     <table class="table is-fullwidth is-striped">
         <thead>
             <tr>
@@ -32,8 +36,8 @@
                 <th>Status</th>
             </tr>
         </thead>
-        <tbody id="update-history">
-            {% for commit_hash, commit_info in state.commit.items() %}
+        <tbody>
+            {% for commit_hash, commit_info in commits %}
             <tr>
                 <td>{{ commit_info.commit_timestamp | timestamp }}</td>
                 <td><code>{{ commit_info.commit_short_hash }}</code></td>
@@ -65,6 +69,51 @@
             {% endfor %}
         </tbody>
     </table>
+    
+    {% if pagination.total_pages > 1 %}
+    <nav hx-boost="true" hx-target="#update-history" hx-select="#update-history" hx-swap="outerHTML" hx-push-url="false" class="pagination is-centered mt-4" role="navigation" aria-label="pagination">
+        {% if pagination.has_prev %}
+        <a class="pagination-previous" href="?page={{ pagination.prev_page }}&per_page={{ pagination.per_page }}">Previous</a>
+        {% else %}
+        <span class="pagination-previous" disabled>Previous</span>
+        {% endif %}
+        
+        {% if pagination.has_next %}
+        <a class="pagination-next" href="?page={{ pagination.next_page }}&per_page={{ pagination.per_page }}">Next page</a>
+        {% else %}
+        <span class="pagination-next" disabled>Next page</span>
+        {% endif %}
+        
+        <ul class="pagination-list">
+            {% set start_page = [1, pagination.page - 2] | max %}
+            {% set end_page = [pagination.total_pages, pagination.page + 2] | min %}
+            
+            {% if start_page > 1 %}
+            <li><a class="pagination-link" href="?page=1&per_page={{ pagination.per_page }}">1</a></li>
+            {% if start_page > 2 %}
+            <li><span class="pagination-ellipsis">&hellip;</span></li>
+            {% endif %}
+            {% endif %}
+            
+            {% for page_num in range(start_page, end_page + 1) %}
+            <li>
+                {% if page_num == pagination.page %}
+                <span class="pagination-link is-current" aria-current="page">{{ page_num }}</span>
+                {% else %}
+                <a class="pagination-link" href="?page={{ page_num }}&per_page={{ pagination.per_page }}">{{ page_num }}</a>
+                {% endif %}
+            </li>
+            {% endfor %}
+            
+            {% if end_page < pagination.total_pages %}
+            {% if end_page < pagination.total_pages - 1 %}
+            <li><span class="pagination-ellipsis">&hellip;</span></li>
+            {% endif %}
+            <li><a class="pagination-link" href="?page={{ pagination.total_pages }}&per_page={{ pagination.per_page }}">{{ pagination.total_pages }}</a></li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
 </div>
 <div hx-ext="ws" ws-connect="/ws"></div>
 <div class="level mt-4">

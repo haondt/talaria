@@ -78,7 +78,37 @@ def add_routes(app: FastAPI):
 
     @app.get("/", response_class=HTMLResponse)
     async def root(request: Request):
-        return templates.TemplateResponse("index.html", {"request": request, "state": state})
+        # Get pagination parameters
+        page = int(request.query_params.get("page", 1))
+        per_page = int(request.query_params.get("per_page", 2))
+        
+        # Ensure page is at least 1
+        page = max(1, page)
+        per_page = max(1, min(100, per_page))  # Limit per_page between 1 and 100
+        
+        # Get paginated commits
+        commits, total_count = state.commit.items(page=page, per_page=per_page)
+        
+        # Calculate pagination info
+        total_pages = (total_count + per_page - 1) // per_page
+        has_prev = page > 1
+        has_next = page < total_pages
+        
+        return templates.TemplateResponse("index.html", {
+            "request": request, 
+            "state": state,
+            "commits": commits,
+            "pagination": {
+                "page": page,
+                "per_page": per_page,
+                "total_count": total_count,
+                "total_pages": total_pages,
+                "has_prev": has_prev,
+                "has_next": has_next,
+                "prev_page": page - 1 if has_prev else None,
+                "next_page": page + 1 if has_next else None
+            }
+        })
 
     @app.post("/api/webhooks/gitlab", response_class=HTMLResponse)
     async def gitlab_webhook(request: Request):
