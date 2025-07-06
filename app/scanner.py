@@ -71,12 +71,15 @@ async def _run_scan(delay):
             _logger.info(f'Checking for updates for {parsed_image}')
 
             candidate_tags = await image_updater.get_sorted_candidate_tags(parsed_image, target.bump)
+            _logger.debug(f'Found {len(candidate_tags)} candidate tags for target {parsed_image} with bump size {target.bump}.')
             if len(candidate_tags) == 0:
                 return
 
             desired_tag = candidate_tags[0]
+            _logger.debug(f'Using desired tag {desired_tag} for target {parsed_image} with bump size {target.bump}.')
             digest, created = await image_updater.get_digest(parsed_image, desired_tag)
-            if not image_updater.is_upgrade(parsed_image.tag_and_digest, desired_tag, digest):
+            if image_updater.is_upgrade(parsed_image.tag_and_digest, desired_tag, digest) is None:
+                _logger.debug(f'Determined desired tag {desired_tag} with digest {digest} for target {parsed_image} is not an upgrade.')
                 return 
 
             new_image = replace(parsed_image, 
