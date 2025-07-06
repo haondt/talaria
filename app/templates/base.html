@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Talaria{% endblock %}</title>
 
+    <link rel="icon" type="image/svg+xml" href="/static/logo.svg">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.4/css/bulma.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/htmx.org@2.0.6/dist/htmx.min.js"></script>
@@ -21,11 +22,18 @@
     />
     
     {% block extra_head %}{% endblock %}
+
+    <style>
+        :root {
+            color-scheme: dark;
+        }
+    </style>
 </head>
 <body>
     <nav class="navbar is-black" role="navigation" aria-label="main navigation">
         <div class="navbar-brand">
             <div class="navbar-item">
+                <img src="/static/logo.svg" alt="Talaria Logo" width="32" height="32">
                 <span class="title is-3">Talaria</span>
             </div>
         </div>

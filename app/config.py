@@ -48,6 +48,9 @@ class Config:
         self.git_repo_url = os.environ['TL_GIT_REPO_URL']
         self.git_branch = os.getenv('TL_GIT_BRANCH', 'main')
         self.git_auth_token = os.environ['TL_GIT_AUTH_TOKEN']
+        self.git_user_email = os.getenv('TL_GIT_USER_EMAIL', 'talaria@example.com')
+        self.git_user_name = os.getenv('TL_GIT_USER_NAME', 'talaria')
+
 
         self.docker_compose_file_pattern = os.getenv('TL_DOCKER_COMPOSE_FILE_PATTERN', 'docker-compose*.y*ml')
 

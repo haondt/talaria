@@ -85,3 +85,7 @@ class TalariaGit:
         auth_url = self.repo_url.replace('https://', f'https://oauth2:{self.auth_token}@')
         self._run_git('remote', 'set-url', 'origin', auth_url)
         _logger.info("Configured authentication for repository")
+
+    def setup_environment(self):
+        self._run_git('config', 'user.email', config.git_user_email)
+        self._run_git('config', 'user.name', config.git_user_name)

@@ -1,12 +1,14 @@
 from fastapi import FastAPI, Request, WebSocket, WebSocketDisconnect, status
 from fastapi.templating import Jinja2Templates
-from fastapi.responses import HTMLResponse, Response
+from fastapi.responses import HTMLResponse, Response, FileResponse
+from fastapi.staticfiles import StaticFiles
 import logging
 from .state import state
 import asyncio
 from .config import config
 from . import gitlab
 from . import jinja_filters
+import os
 
 _logger = logging.getLogger(__name__)
 
@@ -146,4 +148,11 @@ def add_routes(app: FastAPI):
     async def force_start_scan(request: Request):
         await state.scanner_message_queue.put("scan_now")
         return templates.TemplateResponse("next_scan.html", {"request": request, "state": state, "swap": True})
+
+    @app.get("/static/logo.svg")
+    async def serve_logo():
+        logo_path = os.path.join(os.path.dirname(__file__), "static", "logo.svg")
+        if not os.path.exists(logo_path):
+            return Response(status_code=404)
+        return FileResponse(path=logo_path)
 

@@ -48,6 +48,7 @@ async def _run_scan(delay):
         repo = git.TalariaGit()
         repo.delete()
         repo.clone()
+        repo.setup_environment()
         repo.setup_auth()
 
         docker_compose_files: list[str] = docker_compose_file.get_docker_compose_files()
