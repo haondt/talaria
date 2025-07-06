@@ -77,8 +77,6 @@ def _parse_skip_value(value: str) -> bool:
             return False
 
 def _find_x_config(lines: list[str], current_line_num: int, current_indent: int) -> tuple[BumpSize, bool]:
-    """Find x-talos or x-tl configuration and parse bump/skip values"""
-    
     # Search downwards for x-talos or x-tl at the same indentation level
     for i in range(current_line_num + 1, len(lines)):
         line = lines[i]
@@ -91,16 +89,19 @@ def _find_x_config(lines: list[str], current_line_num: int, current_indent: int)
         if indent == current_indent:
             line_stripped = line.strip()
             
-            if line_stripped.startswith('x-talos:'):
+            if line_stripped.startswith('x-talaria:'):
                 # Parse x-talos configuration
-                return _parse_x_talos_config(lines, i, current_indent)
+                return _parse_x_talaria_config(lines, i, current_indent)
             elif line_stripped.startswith('x-tl:'):
                 # Parse x-tl configuration
                 return _parse_x_tl_config(line_stripped)
+            elif config.enable_talos_compatibility and line_stripped.startswith('x-talos:'):
+                # Parse x-talos configuration
+                return _parse_x_talaria_config(lines, i, current_indent)
     
     raise ValueError(f"Unable to find talos configuration")
 
-def _parse_x_talos_config(lines: list[str], start_line: int, base_indent: int) -> tuple[BumpSize, bool]:
+def _parse_x_talaria_config(lines: list[str], start_line: int, base_indent: int) -> tuple[BumpSize, bool]:
     """Parse x-talos configuration block"""
     bump = BumpSize.DIGEST
     skip = False
@@ -127,7 +128,7 @@ def _parse_x_tl_config(line: str) -> tuple[BumpSize, bool]:
     """Parse x-tl configuration (single line format)"""
     value = line.split(':', 1)[1].strip()
     value = _remove_quotes(value)
-    if config.enable_talos_short_form_compatibility:
+    if config.enable_talos_compatibility:
         if len(value) > 0:
             value = value[0]
     if value == 'x':

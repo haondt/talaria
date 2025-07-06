@@ -1,0 +1,21 @@
+tasks:
+  - type: docker-build
+    image: talaria
+    auto:
+      - source: push
+        has_tag: true
+        tag_source: tag
+      - source: push
+        has_tag: true
+        tag_source: latest
+    context: .
+    file: Dockerfile
+    registries:
+      - gitlab
+      - docker-hub
+    labels:
+      source: https://gitlab.com/haondt/talaria
+      url: https://docs.haondt.dev/talaria/
+      title: talaria
+      image.base.name: docker.io/library/python:3.13.2-alpine
+

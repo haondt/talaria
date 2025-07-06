@@ -55,7 +55,7 @@ class Config:
         self.docker_compose_file_pattern = os.getenv('TL_DOCKER_COMPOSE_FILE_PATTERN', 'docker-compose*.y*ml')
 
         self.valid_releases = os.getenv('TL_VALID_RELEASES', 'latest|stable|mainline|develop')
-        self.enable_talos_short_form_compatibility = parse_bool_env_var('TL_TALOS_SHORT_FORM_COMPAT', False)
+        self.enable_talos_compatibility = parse_bool_env_var('TL_TALOS_COMPAT', False)
         self.maximum_concurrent_pushes = int(os.getenv('TL_MAX_CONCURRENT_PUSHES', 5))
 
         # Skopeo cache settings
