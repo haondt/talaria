@@ -16,7 +16,7 @@ class PipelineStatus(str, Enum):
 class CommitInfo:
     commit_hash: str
     commit_short_hash: str
-    commit_url: str
+    commit_url: str | None
     pipeline_url: str | None
     pipeline_status: PipelineStatus
     commit_timestamp: float
@@ -98,6 +98,9 @@ class State:
     class CommitDict:
         def __init__(self, state):
             self.state = state
+
+        def __contains__(self, commit_hash: str) -> bool:
+            return self.__getitem__(commit_hash) is not None
 
         def __getitem__(self, commit_hash: str) -> CommitInfo | None:
             with self.state._lock, self.state._get_conn() as conn:

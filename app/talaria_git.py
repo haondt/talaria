@@ -14,7 +14,7 @@ class TalariaGit:
         self.branch = config.git_branch
         self.auth_token = config.git_auth_token
 
-    def _run_git(self, *args, cwd=None):
+    def _run_git(self, *args, cwd=None) -> str:
         """Run a git command and return the result"""
         if cwd is None:
             cwd = self.repo_path
@@ -54,10 +54,14 @@ class TalariaGit:
                 self._run_git('add', file)
         _logger.info(f"Staged changes: {files if files else 'all'}")
 
-    def commit(self, message):
+    def commit(self, title: str, description: str | None = None):
         """Commit staged changes"""
-        self._run_git('commit', '-m', message)
-        _logger.info(f"Committed with message: {message}")
+        if description is None:
+            self._run_git('commit', '-m', title)
+            _logger.info(f"Committed with message: {title}")
+        else:
+            self._run_git('commit', '-m', title, '-m', description)
+            _logger.info(f"Committed with message: {title}\n{description}")
 
     def push(self):
         """Push changes to remote"""
@@ -78,8 +82,6 @@ class TalariaGit:
             _logger.warning("No auth token configured")
             return
         
-        # Configure git to use the token in the URL
-        # This is a simple approach; you might want to use git credential helper for production
         auth_url = self.repo_url.replace('https://', f'https://oauth2:{self.auth_token}@')
         self._run_git('remote', 'set-url', 'origin', auth_url)
         _logger.info("Configured authentication for repository")

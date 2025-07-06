@@ -10,7 +10,7 @@ from . import image_parser
 from . import skopeo
 from . import config
 from . import talaria_git as git
-from .state import state
+from .state import CommitInfo, PipelineStatus, state
 from . import docker_compose_file
 _logger = logging.getLogger(__name__)
 
@@ -44,9 +44,12 @@ async def _start():
 async def _run_scan(delay):
     try:
         _logger.info("Running scan...")
+
         repo = git.TalariaGit()
-        # repo.delete()
-        # repo.clone()
+        repo.delete()
+        repo.clone()
+        repo.setup_auth()
+
         docker_compose_files: list[str] = docker_compose_file.get_docker_compose_files()
         targets: list[DockerComposeTarget] = []
         for file in docker_compose_files:
@@ -89,10 +92,34 @@ async def _run_scan(delay):
         results = await asyncio.gather(*get_updates_tasks)
         results = [i for i in results if i is not None]
 
-        _logger.info(f'Found {len(results)} updates.')
+        _logger.info(f'Found {len(results)} updates. Taking the first {config.maximum_concurrent_pushes}.')
+        results = results[:config.maximum_concurrent_pushes]
+
+        if len(results) > 0:
+            _logger.info('Applying changes to git repo')
+            commit_title = "[Talaria] Updating images"
+            changes = []
+            for (target, old_image, new_image) in results:
+                docker_compose_file.apply_update(target, str(new_image))
+                changes.append(ParsedImage.diff_string(old_image, new_image.tag_and_digest))
+            commit_body = '\n'.join(changes)
+
+            repo.add()
+            repo.commit(commit_title, commit_body)
+            repo.push()
 
 
-
+            sha = repo.get_current_commit()
+            state.commit[sha] = CommitInfo(
+                commit_hash=sha,
+                commit_short_hash=repo.get_short_commit(),
+                commit_url=None,
+                commit_timestamp=time.time(),
+                pipeline_url=None,
+                pipeline_status=PipelineStatus.UNKNOWN,
+                pipeline_timestamp=None,
+                pipeline_duration=None
+            )
 
         _logger.info("Scan complete.")
     except Exception as e:

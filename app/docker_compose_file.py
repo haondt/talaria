@@ -175,7 +175,7 @@ def get_images(file_path: str) -> tuple[list[DockerComposeTarget], list[str]]:
                 target = DockerComposeTarget(
                     file_path=file_path,
                     service_key=service_key,
-                    line=line_num + 1,  # Convert to 1-indexed
+                    line=line_num,
                     current_image_string=image,
                     bump=bump,
                     skip=skip
@@ -190,3 +190,22 @@ def get_images(file_path: str) -> tuple[list[DockerComposeTarget], list[str]]:
 
     
     return targets, errors
+
+def apply_update(target: DockerComposeTarget, new_image: str):
+    """Apply the update to the docker-compose file by replacing the image line"""
+    with open(target.file_path, 'r') as f:
+        lines = f.readlines()
+    
+    line_index = target.line
+    if line_index >= len(lines):
+        raise ValueError(f"Line {target.line} is out of bounds for file {target.file_path}")
+    
+    original_line = lines[line_index]
+    indent = _get_indentation(original_line)
+    indent_str = ' ' * indent
+    
+    new_line = f"{indent_str}image: {new_image}\n"
+    lines[line_index] = new_line
+    
+    with open(target.file_path, 'w') as f:
+        f.writelines(lines)
