@@ -8,12 +8,12 @@ RUN apk add \
 
 
 RUN addgroup -S talaria && adduser -S talaria -G talaria
+USER talaria
 
 COPY --chown=talaria:talaria requirements.txt /app
 RUN pip install --no-cache-dir -r requirements.txt
 
 COPY --chown=talaria:talaria app /app/app
 
-USER talaria
 ENTRYPOINT ["python", "-m", "app"]
 
